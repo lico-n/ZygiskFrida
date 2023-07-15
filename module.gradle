@@ -1,0 +1,26 @@
+ext {
+    // Adjust this for the app you want to inject frida gadget into
+
+    // The module will inject gadget with this process name
+    appPackageName = "com.example.package"
+
+    // The gadget library you want to inject.
+    // Search for a release matching the major version of your frida client.
+    // https://github.com/frida/frida/releases
+    // Download the gadget for the correct architecture of your phone and
+    // put it extracted as an .so file into the gadget directory.
+    // The path specified is relative to the gadget directory
+    // f.e. if you put it into "gadget/libgadget.so", then specify libgadget.so here.
+    gadgetPath = "libgadget.so"
+
+
+    // magisk module
+    moduleLibraryName = "zygiskfrida"
+    magiskModuleId = "zygiskfrida"
+    moduleName = "ZygiskFrida"
+    moduleAuthor = "lico-n"
+    moduleDescription = "Injects frida gadget via zygisk (${appPackageName})"
+    moduleVersion = "v1.0.0"
+    moduleVersionCode = 1
+    modulePackageName = "re.zyg.fri"
+}

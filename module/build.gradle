@@ -1,0 +1,113 @@
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+import java.nio.file.Paths
+import java.nio.file.Files
+
+apply plugin: 'com.android.library'
+apply from: file(rootProject.file('module.gradle'))
+
+task prepareConfig(type: Copy) {
+    inputs.file("$rootDir/module.gradle")
+
+    from "$rootDir/template/config.h"
+    expand([
+            header: "// DO NOT EDIT. Generated file from template/config.h. Values from module.gradle\n",
+            appPackageName: appPackageName,
+            gadgetPath: gadgetPath,
+            magiskModuleId: magiskModuleId,
+            modulePackageName: modulePackageName,
+    ])
+    into "$rootDir/module/src/jni"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('buildNdkBuildRelease')) {
+        task.dependsOn prepareConfig
+    }
+}
+
+android {
+    namespace = "zygisk.frida"
+    compileSdkVersion rootProject.ext.targetSdkVersion
+    ndkVersion '25.2.9519653'
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        externalNativeBuild {
+            cmake {
+                arguments "-DMODULE_NAME:STRING=$moduleLibraryName"
+            }
+        }
+    }
+    buildFeatures {
+        prefab true
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "src/jni/Android.mk"
+        }
+    }
+}
+
+afterEvaluate {
+    android.libraryVariants.forEach { variant ->
+        def variantCapped = variant.name.capitalize()
+        def variantLowered = variant.name.toLowerCase()
+
+        def zipName = "${magiskModuleId.replace('_', '-')}-${moduleVersion}-${variantLowered}.zip"
+        def magiskDir = file("$outDir/magisk_module_$variantLowered")
+
+        assert file("$rootDir/gadget/$gadgetPath").exists()
+
+        task("prepareMagiskFiles${variantCapped}", type: Sync) {
+            dependsOn("assemble$variantCapped")
+
+            def templatePath = "$rootDir/template/magisk_module"
+
+            into magiskDir
+            from(templatePath) {
+                exclude 'module.prop'
+            }
+            from(templatePath) {
+                include 'module.prop'
+                expand([
+                        id         : magiskModuleId,
+                        name       : moduleName,
+                        version    : moduleVersion,
+                        versionCode: moduleVersionCode.toString(),
+                        author     : moduleAuthor,
+                        description: moduleDescription,
+                ])
+                filter(FixCrLfFilter.class,
+                        eol: FixCrLfFilter.CrLf.newInstance("lf"))
+            }
+            from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib") {
+                into 'lib'
+            }
+            from("$rootDir/gadget") {
+                exclude '.gitkeep'
+                into 'gadget'
+            }
+            doLast {
+                file("$magiskDir/zygisk").mkdir()
+                fileTree("$magiskDir/lib").visit { f ->
+                    if (!f.directory) return
+                    def srcPath = Paths.get("${f.file.absolutePath}/lib${moduleLibraryName}.so")
+                    def dstPath = Paths.get("$magiskDir/zygisk/${f.path}.so")
+                    Files.move(srcPath, dstPath)
+                }
+                new File("$magiskDir/lib").deleteDir()
+            }
+        }
+
+        task("zip${variantCapped}", type: Zip) {
+            dependsOn("prepareMagiskFiles${variantCapped}")
+            from magiskDir
+            archiveFileName.set(zipName)
+            destinationDirectory.set(outDir)
+        }
+
+        variant.assembleProvider.get().finalizedBy("zip${variantCapped}")
+    }
+}
