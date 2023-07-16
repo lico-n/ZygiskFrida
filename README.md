@@ -17,34 +17,7 @@ more stealthy way.
 
 ## How to build
 
-There are two alternatives to build this project.
-
-### Using Github Actions
-
-Trigger the [Build Workflow](https://github.com/lico-n/ZygiskFrida/actions/workflows/build.yml) via workflow dispatch.
-
-After you triggered the build, wait for the build to complete.
-The magisk module zip file will be an output artifact of that build.
-
-Parameters that you have to specify:
-
-**Package Name**\
-The gadget will only be injected in processes with this package name.
-
-f.e. com.package.example
-
-**Gadget Download link**\
-Visit the [frida release page](https://github.com/frida/frida/releases).
-Get the download link for the correct architecture of your device.
-
-f.e. https://github.com/frida/frida/releases/download/16.1.3/frida-gadget-16.1.3-android-arm64.so.xz
-
-
-
-
-### Checking out the project
-
-Building the project yourself allows you to rename things making it more stealthy.\
+Building the project yourself allows you to rename things making it more stealthy.
 It also allows you to add files like a gadget config and scripts, see [Gadget Doc](https://frida.re/docs/gadget/)
 
 - Checkout the project
@@ -75,9 +48,6 @@ replacing the text file at `/data/adb/modules/zygiskfrida/target_packages`.\
 The text file should contain the package names you want the gadget to start in separated by newlines.
 
 ## Caveats
-
-- This module will transfer the gadget files into the `/data/app/**/{app_package_name}/lib/{arch}/re.zyg.fri` directory at app startup.\
-  The files will remain there as leftovers. You can free up device space by deleting them nanually.
 
 - For emulators this will start the gadget in native realm. This means that you will be able to hook Java but not native functions.\
   Choose the gadget of the architecture of your host instead of the emulated phone f.e. `frida-gadget-16.1.3-android-x86_64.so`.

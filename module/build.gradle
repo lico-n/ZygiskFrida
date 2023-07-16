@@ -68,11 +68,18 @@ afterEvaluate {
             from(templatePath) {
                 exclude 'module.prop'
                 exclude 'target_packages'
+                exclude 'uninstall.sh'
             }
             from(templatePath) {
                 include 'target_packages'
                 expand([
                         appPackageName: appPackageName
+                ])
+            }
+            from(templatePath) {
+                include 'uninstall.sh'
+                expand([
+                        modulePackageName: modulePackageName
                 ])
             }
             from(templatePath) {
