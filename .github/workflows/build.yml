@@ -1,0 +1,37 @@
+name: Build
+on:
+  workflow_dispatch:
+    inputs:
+      package_name:
+        description: "Package name of the app:"
+        required: true
+      gadget_url:
+        description: "Download link to the gadget:"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          submodules: 'true'
+      - uses: actions/setup-java@5ffc13f4174014e2d4d4572b3d74c3fa61aeb2c2 # v3.11.0
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: gradle
+      - name: Download gadget
+        run: |
+          wget -O ./gadget/libgadget.so.xz ${{ github.event.inputs.gadget_url }}
+          unxz ./gadget/libgadget.so.xz
+      - name: Configure
+        run: sed -i 's/com.example.package/${{ github.event.inputs.package_name }}/g' module.gradle
+      - name: Build module
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :module:assembleRelease
+      - uses: actions/upload-artifact@v3
+        with:
+          name: zygisk-frida
+          path: out/magisk_module_release/
