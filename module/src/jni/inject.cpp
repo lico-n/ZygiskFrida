@@ -46,7 +46,7 @@ void *open_gadget(const char *path) {
             2/*ANDROID_NAMESPACE_TYPE_SHARED*/,
             nullptr,
             nullptr,
-            reinterpret_cast<void *>(&dlopen));
+            reinterpret_cast<void *>(&open_gadget));
 
         info.flags = ANDROID_DLEXT_USE_NAMESPACE;
         info.library_namespace = ns;
