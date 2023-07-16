@@ -17,10 +17,6 @@
 #include "log.h"
 #include "config.h"
 
-bool should_inject(std::string app_name) {
-    return app_name == AppPackageName;
-}
-
 extern "C" [[gnu::weak]] struct android_namespace_t *
 
 __loader_android_create_namespace(
@@ -65,9 +61,9 @@ std::string get_process_name() {
     return buffer.str();
 }
 
-void wait_for_init() {
+void wait_for_init(std::string const& app_name) {
     // wait until the process is renamed to the package name
-    while (get_process_name().find(AppPackageName) == std::string::npos) {
+    while (get_process_name().find(app_name) == std::string::npos) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
@@ -75,14 +71,14 @@ void wait_for_init() {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
-void inject_gadget(std::string gadget_path) {
+void inject_gadget(std::string const& gadget_path, std::string const& app_name) {
     LOGI("Wait for process to complete init");
 
     // We need to wait for process initialization to complete.
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
     // undiscoverable or otherwise cause issue attaching.
-    wait_for_init();
+    wait_for_init(app_name);
 
     LOGI("Starting gadget %s", gadget_path.c_str());
     auto *handle = open_gadget(gadget_path.c_str());

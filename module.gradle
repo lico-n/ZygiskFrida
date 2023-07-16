@@ -19,7 +19,7 @@ ext {
     magiskModuleId = "zygiskfrida"
     moduleName = "ZygiskFrida"
     moduleAuthor = "lico-n"
-    moduleDescription = "Injects frida gadget via zygisk (${appPackageName})"
+    moduleDescription = "Injects frida gadget via zygisk."
     moduleVersion = "v1.0.0"
     moduleVersionCode = 1
     modulePackageName = "re.zyg.fri"

@@ -3,12 +3,29 @@
 #include <sys/stat.h>
 
 #include <filesystem>
+#include <fstream>
 #include <map>
 
 #include "log.h"
 #include "config.h"
 
 namespace fs = std::filesystem;
+
+bool should_inject(std::string const& module_dir, std::string const& app_name) {
+    std::ifstream target_file(module_dir + "/target_packages");
+    if (!target_file.is_open()) {
+        return false;
+    }
+
+    std::string line;
+    while (getline(target_file, line)) {
+        if (line == app_name) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 void sync_directories(std::string destination, std::string source) {
     fs::copy(
@@ -31,11 +48,10 @@ void sync_directories(std::string destination, std::string source) {
     }
 }
 
-std::string prepare_gadget() {
-    std::string module_dir = "/data/adb/modules/";
+std::string prepare_gadget(std::string const& module_dir) {
     std::string tmp_dir = "/data/local/tmp/";
     std::string destination = tmp_dir + ModulePackageName;
-    std::string source = module_dir + MagiskModuleId + "/gadget";
+    std::string source = module_dir + "/gadget";
     std::string gadget_path = destination + "/" + GadgetPath;
 
     mkdir(destination.c_str(), 0755);
