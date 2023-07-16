@@ -13,6 +13,7 @@ more stealthy way.
 - The gadget is not embedded into the APK itself. So APK Integrity/Signature checks will still pass.
 - The process is not being ptraced like it is with frida-server. Avoiding ptrace based detection.
 
+**This is an early version and things are still unstable. Deployment and usage might still change significantly.**
 
 ## How to build
 
@@ -68,6 +69,10 @@ It also allows you to add files like a gadget config and scripts, see [Gadget Do
   f.e. `frida -U -N com.example.package` or `frida -U -n Gadget`
 
 The first launch after install might not work. In that case please try to force close the app and retry.
+
+You can change the package that is injected without rebuilding by
+replacing the text file at `/data/adb/modules/zygiskfrida/target_packages`.\
+The text file should contain the package names you want the gadget to start in separated by newlines.
 
 ## Caveats
 

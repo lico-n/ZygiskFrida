@@ -12,7 +12,6 @@ task prepareConfig(type: Copy) {
     from "$rootDir/template/config.h"
     expand([
             header: "// DO NOT EDIT. Generated file from template/config.h. Values from module.gradle\n",
-            appPackageName: appPackageName,
             gadgetPath: gadgetPath,
             magiskModuleId: magiskModuleId,
             modulePackageName: modulePackageName,
@@ -68,6 +67,13 @@ afterEvaluate {
             into magiskDir
             from(templatePath) {
                 exclude 'module.prop'
+                exclude 'target_packages'
+            }
+            from(templatePath) {
+                include 'target_packages'
+                expand([
+                        appPackageName: appPackageName
+                ])
             }
             from(templatePath) {
                 include 'module.prop'
