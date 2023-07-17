@@ -3,7 +3,6 @@
 
 #include "inject.h"
 #include "log.h"
-#include "prepare.h"
 #include "zygisk.h"
 #include "config.h"
 
@@ -23,7 +22,8 @@ class MyModule : public zygisk::ModuleBase {
         this->app_name = std::string(raw_app_name);
         this->env->ReleaseStringUTFChars(args->nice_name, raw_app_name);
 
-        std::string module_dir = std::string("/data/adb/modules/") + MagiskModuleId;
+        std::string module_dir = std::string("/data/local/tmp/") + ModulePackageName;
+        this->gadget_path = module_dir + "/" + GadgetLibraryName;
 
         this->inject = should_inject(module_dir, this->app_name);
         if (!this->inject) {
@@ -32,17 +32,6 @@ class MyModule : public zygisk::ModuleBase {
         }
 
         LOGI("App detected: %s", this->app_name.c_str());
-        LOGI("Preparing for gadget injection");
-
-        this->gadget_path = prepare_gadget(module_dir);
-        if (this->gadget_path.empty()) {
-            LOGE("unexpected error preparing gadget");
-            this->inject = false;
-            this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
-        }
-
-        LOGI("Preparation completed");
     }
 
     void postAppSpecialize(const AppSpecializeArgs *) override {

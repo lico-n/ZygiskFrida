@@ -22,6 +22,5 @@ jobs:
           cache: gradle
       - name: Test Build
         run: |
-          touch ./gadget/libgadget.so
           chmod +x ./gradlew
           ./gradlew :module:assembleRelease

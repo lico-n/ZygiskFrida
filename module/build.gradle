@@ -3,17 +3,45 @@ import org.apache.tools.ant.filters.FixCrLfFilter
 import java.nio.file.Paths
 import java.nio.file.Files
 
+plugins {
+    id "de.undercouch.download" version "5.4.0"
+}
+
 apply plugin: 'com.android.library'
 apply from: file(rootProject.file('module.gradle'))
+
+
+task downloadFrida(type: Download) {
+    def downloadArchs = ["arm", "arm64", "x86_64", "x86"]
+    def magiskArchs = ["arm", "arm64", "x64", "x86"]
+
+    def sources = downloadArchs.collect{
+        arch -> "https://github.com/frida/frida/releases/download/${fridaVersion}/frida-gadget-${fridaVersion}-android-${arch}.so.xz".toString()
+    }
+
+    def outputs = magiskArchs.collect{
+        arch ->  "libgadget-${arch}.so.xz".toString()
+    }
+
+    def downloads = [sources, outputs].transpose().collectEntries()
+
+    src downloads.keySet()
+    dest "$rootDir/gadget"
+    overwrite true
+    onlyIfModified true
+    quiet true
+    eachFile { f ->
+        f.name = downloads[f.sourceURL.toString()]
+    }
+}
 
 task prepareConfig(type: Copy) {
     inputs.file("$rootDir/module.gradle")
 
     from "$rootDir/template/config.h"
     expand([
-            header: "// DO NOT EDIT. Generated file from template/config.h. Values from module.gradle\n",
-            gadgetPath: gadgetPath,
-            magiskModuleId: magiskModuleId,
+            header           : "// DO NOT EDIT. Generated file from template/config.h. Values from module.gradle\n",
+            gadgetLibraryName: gadgetLibraryName,
             modulePackageName: modulePackageName,
     ])
     into "$rootDir/module/src/jni"
@@ -54,32 +82,27 @@ afterEvaluate {
         def variantCapped = variant.name.capitalize()
         def variantLowered = variant.name.toLowerCase()
 
-        def zipName = "${magiskModuleId.replace('_', '-')}-${moduleVersion}-${variantLowered}.zip"
+        def zipName = "${moduleName}-${moduleVersion}-${variantLowered}.zip"
         def magiskDir = file("$outDir/magisk_module_$variantLowered")
-
-        assert file("$rootDir/gadget/$gadgetPath").exists()
 
         task("prepareMagiskFiles${variantCapped}", type: Sync) {
             dependsOn("assemble$variantCapped")
+            dependsOn downloadFrida
 
             def templatePath = "$rootDir/template/magisk_module"
 
             into magiskDir
             from(templatePath) {
                 exclude 'module.prop'
-                exclude 'target_packages'
                 exclude 'uninstall.sh'
-            }
-            from(templatePath) {
-                include 'target_packages'
-                expand([
-                        appPackageName: appPackageName
-                ])
+                exclude 'customize.sh'
             }
             from(templatePath) {
                 include 'uninstall.sh'
+                include 'customize.sh'
                 expand([
-                        modulePackageName: modulePackageName
+                        modulePackageName: modulePackageName,
+                        gadgetLibraryName: gadgetLibraryName
                 ])
             }
             from(templatePath) {

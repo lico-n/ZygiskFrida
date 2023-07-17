@@ -13,44 +13,37 @@ more stealthy way.
 - The gadget is not embedded into the APK itself. So APK Integrity/Signature checks will still pass.
 - The process is not being ptraced like it is with frida-server. Avoiding ptrace based detection.
 
-**This is an early version and things are still unstable. Deployment and usage might still change significantly.**
+## How to use the module
+
+- Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)
+- Transfer the ZygiskFrida zip file to your device and install it via Magisk.
+- Reboot after install
+- Update `/data/local/tmp/re.zyg.fri/target_packages` on your device with the target package names.\
+  Apps with matching package names will be injected with the gadget. One package name per line.\
+  f.e. `adb shell 'su -c "echo com.example.package > /data/local/tmp/re.zyg.fri/target_packages"'`
+
+- Launch your app. It will pause at startup allowing you to attach
+  f.e. `frida -U -N com.example.package` or `frida -U -n Gadget`
+
+The gadget is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
+You can follow the [Gadget Docs](https://frida.re/docs/gadget/) to add additional
+gadget config and scripts into that location.
+
+In case you want to use a different gadget version than the one bundled, you can simply
+replace the `libgadget.so` with your own frida gadget.
 
 ## How to build
 
 Building the project yourself allows you to rename things making it more stealthy.
-It also allows you to add files like a gadget config and scripts, see [Gadget Doc](https://frida.re/docs/gadget/)
 
 - Checkout the project
 - Initialize the submodules with `git submodule update --init`
-- The `./gadget` directory will be transferred to the device.\
-  You must at least put the uncompressed gadget library in here.\
-  You can download it from the [frida release page](https://github.com/frida/frida/releases) and extract it into this directory.
-  Here you can also put additional gadget config/scripts.
-- Update `./module.gradle`.\
-  `appPackageName` is the process name you want to inject frida into.\
-  `gadgetPath` is the path relative to the `./gadget` directory. f.e. \
-   if you put the gadget `./gadget/frida-gadget-16.1.3-android-arm64.so` here,\
-   then specify `frida-gadget-16.1.3-android-arm64.so`
 - Run `./gradlew :module:assembleRelease`
 - The build magisk module should then be in the `out` directory.
 
-## How to use the module
-
-- Transfer the module zip file to your device and install it via Magisk.
-- Reboot after install
-- Launch your app. It will pause at startup allowing you to attach
-  f.e. `frida -U -N com.example.package` or `frida -U -n Gadget`
-
-The first launch after install might not work. In that case please try to force close the app and retry.
-
-You can change the package that is injected without rebuilding by
-replacing the text file at `/data/adb/modules/zygiskfrida/target_packages`.\
-The text file should contain the package names you want the gadget to start in separated by newlines.
-
 ## Caveats
 
-- For emulators this will start the gadget in native realm. This means that you will be able to hook Java but not native functions.\
-  Choose the gadget of the architecture of your host instead of the emulated phone f.e. `frida-gadget-16.1.3-android-x86_64.so`.
+- For emulators this will start the gadget in native realm. This means that you will be able to hook Java but not native functions.
 
 - This is not yet tested very well on different devices.\
   In case this is not working reports with logs `adb logcat -S ZygiskFrida` are welcome.
