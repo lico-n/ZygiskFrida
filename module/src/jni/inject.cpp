@@ -3,8 +3,8 @@
 #include <android/dlext.h>
 #include <dlfcn.h>
 #include <libgen.h>
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <chrono>
 #include <cstddef>
@@ -15,7 +15,25 @@
 #include <thread>
 
 #include "log.h"
-#include "config.h"
+
+
+bool should_inject(std::string const& module_dir, std::string const& app_name) {
+    auto targetFilePath = module_dir + "/target_packages";
+
+    std::ifstream target_file(targetFilePath);
+    if (!target_file.is_open()) {
+        return false;
+    }
+
+    std::string line;
+    while (getline(target_file, line)) {
+        if (line == app_name) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 extern "C" [[gnu::weak]] struct android_namespace_t *
 
