@@ -17,36 +17,28 @@ class MyModule : public zygisk::ModuleBase {
         this->env = env;
     }
 
-    void preAppSpecialize(AppSpecializeArgs *args) override {
-        auto raw_app_name = env->GetStringUTFChars(args->nice_name, nullptr);
-        this->app_name = std::string(raw_app_name);
+    void postAppSpecialize(const AppSpecializeArgs *args) override {
+        const char* raw_app_name = env->GetStringUTFChars(args->nice_name, nullptr);
+        std::string app_name = std::string(raw_app_name);
         this->env->ReleaseStringUTFChars(args->nice_name, raw_app_name);
 
         std::string module_dir = std::string("/data/local/tmp/") + ModulePackageName;
-        this->gadget_path = module_dir + "/" + GadgetLibraryName;
+        std::string gadget_path = module_dir + "/" + GadgetLibraryName;
 
-        this->inject = should_inject(module_dir, this->app_name);
-        if (!this->inject) {
+        if (!should_inject(module_dir, app_name)) {
             this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
-        LOGI("App detected: %s", this->app_name.c_str());
-    }
+        LOGI("App detected: %s", app_name.c_str());
 
-    void postAppSpecialize(const AppSpecializeArgs *) override {
-        if (this->inject) {
-            std::thread inject_thread(inject_gadget, this->gadget_path, this->app_name);
-            inject_thread.detach();
-        }
+        std::thread inject_thread(inject_gadget, gadget_path, app_name);
+        inject_thread.detach();
     }
 
  private:
     Api *api;
     JNIEnv *env;
-    bool inject;
-    std::string gadget_path;
-    std::string app_name;
 };
 
 REGISTER_ZYGISK_MODULE(MyModule)

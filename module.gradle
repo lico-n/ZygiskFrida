@@ -5,7 +5,7 @@ ext {
     moduleName = "ZygiskFrida"
     moduleAuthor = "lico-n"
     moduleDescription = "Injects frida gadget via zygisk."
-    moduleVersion = "v1.0.0"
+    moduleVersion = "v1.1.0"
     moduleVersionCode = 1
     modulePackageName = "re.zyg.fri"
 
