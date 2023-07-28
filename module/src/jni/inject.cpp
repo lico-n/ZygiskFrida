@@ -1,13 +1,6 @@
 #include "inject.h"
 
-#include <android/dlext.h>
-#include <dlfcn.h>
-#include <libgen.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include <chrono>
-#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -15,7 +8,7 @@
 #include <thread>
 
 #include "log.h"
-
+#include "xdl.h"
 
 bool should_inject(std::string const& module_dir, std::string const& app_name) {
     auto targetFilePath = module_dir + "/target_packages";
@@ -33,40 +26,6 @@ bool should_inject(std::string const& module_dir, std::string const& app_name) {
     }
 
     return false;
-}
-
-extern "C" [[gnu::weak]] struct android_namespace_t *
-
-__loader_android_create_namespace(
-    [[maybe_unused]] const char *name,
-    [[maybe_unused]] const char *ld_library_path,
-    [[maybe_unused]] const char *default_library_path,
-    [[maybe_unused]] uint64_t type,
-    [[maybe_unused]] const char *permitted_when_isolated_path,
-    [[maybe_unused]] android_namespace_t *parent,
-    [[maybe_unused]] const void *caller_addr
-);
-
-void *open_gadget(const char *path) {
-    auto info = android_dlextinfo{};
-
-    auto *dir = dirname(path);
-
-    if (&__loader_android_create_namespace != nullptr) {
-        auto *ns = __loader_android_create_namespace(
-            path,
-            dir,
-            nullptr,
-            2/*ANDROID_NAMESPACE_TYPE_SHARED*/,
-            nullptr,
-            nullptr,
-            reinterpret_cast<void *>(&open_gadget));
-
-        info.flags = ANDROID_DLEXT_USE_NAMESPACE;
-        info.library_namespace = ns;
-    }
-
-    return android_dlopen_ext(path, 0, &info);;
 }
 
 std::string get_process_name() {
@@ -99,7 +58,7 @@ void inject_gadget(std::string const& gadget_path, std::string const& app_name) 
     wait_for_init(app_name);
 
     LOGI("Starting gadget %s", gadget_path.c_str());
-    auto *handle = open_gadget(gadget_path.c_str());
+    auto *handle = xdl_open(gadget_path.c_str(), XDL_ALWAYS_FORCE_LOAD);
     if (handle) {
         LOGI("Gadget connected");
     } else {

@@ -53,3 +53,5 @@ You can also build and install the module with `./gradlew :module:flashAndReboot
 ## Credits
 
 - Inspired by https://github.com/Perfare/Zygisk-Il2CppDumper
+- https://github.com/hexhacking/xDL
+
