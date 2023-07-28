@@ -12,22 +12,38 @@ more stealthy way.
 
 - The gadget is not embedded into the APK itself. So APK Integrity/Signature checks will still pass.
 - The process is not being ptraced like it is with frida-server. Avoiding ptrace based detection.
+- Control about the injection time of the gadget.
 
 ## How to use the module
 
+### General Usage
 - Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)
 - Transfer the ZygiskFrida zip file to your device and install it via Magisk.
 - Reboot after install
 - Update `/data/local/tmp/re.zyg.fri/target_packages` on your device with the target package names.\
   Apps with matching package names will be injected with the gadget. One package name per line.\
   f.e. `adb shell 'su -c "echo com.example.package > /data/local/tmp/re.zyg.fri/target_packages"'`
-
 - Launch your app. It will pause at startup allowing you to attach
   f.e. `frida -U -N com.example.package` or `frida -U -n Gadget`
 
-The gadget is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
-You can follow the [Gadget Docs](https://frida.re/docs/gadget/) to add additional
-gadget config and scripts into that location.
+### Further configuration
+
+**Start up delay**
+
+There are times that you might want to delay the injection of the gadget. Some applications
+might run checks at start up and delaying the injection can help avoid these.
+
+`/data/local/tmp/re.zyg.fri/target_packages` accepts a start up delay in milliseconds.
+You can provide it separated by a comma from the package_name.
+
+f.e. `adb shell 'su -c "echo com.example.package,20000 > /data/local/tmp/re.zyg.fri/target_packages"'`
+would inject the gadget after a delay of 20 seconds.
+
+**Gadget version and config**
+
+The gadget started is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
+You can follow the [Gadget Docs](https://frida.re/docs/gadget/) and add an additional
+gadget config and scripts in that location.
 
 In case you want to use a different gadget version than the one bundled, you can simply
 replace the `libgadget.so` with your own frida gadget.

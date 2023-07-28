@@ -1,6 +1,7 @@
 #include <string>
 #include <thread>
 
+#include "config.h"
 #include "inject.h"
 #include "log.h"
 #include "zygisk.h"
@@ -24,14 +25,15 @@ class MyModule : public zygisk::ModuleBase {
         std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
         std::string gadget_path = module_dir + "/libgadget.so";
 
-        if (!should_inject(module_dir, app_name)) {
+        auto cfg = load_config(module_dir, app_name);
+        if (cfg == nullptr) {
             this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
         }
 
         LOGI("App detected: %s", app_name.c_str());
 
-        std::thread inject_thread(inject_gadget, gadget_path, app_name);
+        std::thread inject_thread(inject_gadget, gadget_path, cfg);
         inject_thread.detach();
     }
 
