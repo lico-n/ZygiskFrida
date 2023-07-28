@@ -37,9 +37,10 @@ replace the `libgadget.so` with your own frida gadget.
 Building the project yourself allows you to rename things making it more stealthy.
 
 - Checkout the project
-- Initialize the submodules with `git submodule update --init`
 - Run `./gradlew :module:assembleRelease`
 - The build magisk module should then be in the `out` directory.
+
+You can also build and install the module with `./gradlew :module:flashAndRebootRelease`
 
 ## Caveats
 

@@ -1,3 +1,0 @@
-[submodule "module/src/jni/libcxx"]
-	path = module/src/jni/libcxx
-	url = https://github.com/topjohnwu/libcxx
