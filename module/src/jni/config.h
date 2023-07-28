@@ -1,7 +1,6 @@
 #ifndef ZYGISKFRIDA_CONFIG_H
 #define ZYGISKFRIDA_CONFIG_H
 
-#include <vector>
 #include <string>
 
 struct target_config{

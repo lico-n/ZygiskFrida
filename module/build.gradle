@@ -12,6 +12,7 @@ apply from: file(rootProject.file('module.gradle'))
 
 dependencies {
     implementation 'dev.rikka.ndk.thirdparty:cxx:1.2.0'
+    implementation("dev.rikka.ndk:riru:26.0.0")
 }
 
 task downloadFrida(type: Download) {
@@ -42,9 +43,21 @@ android {
     namespace = "zygisk.frida"
     compileSdkVersion rootProject.ext.targetSdkVersion
     ndkVersion '25.2.9519653'
+
+    flavorDimensions += "api"
+
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+
+        externalNativeBuild {
+            ndkBuild {
+                arguments += "MODULE_VERSION_CODE=$moduleVersionCode"
+                arguments += "MODULE_VERSION_NAME=$moduleVersion"
+                arguments += "RIRU_API_VERSION=$riruApiVersion"
+            }
+        }
+
     }
     buildFeatures {
         prefab true
@@ -53,6 +66,24 @@ android {
     externalNativeBuild {
         ndkBuild {
             path "src/jni/Android.mk"
+        }
+    }
+
+    productFlavors {
+        all {
+            externalNativeBuild {
+                ndkBuild {
+                    arguments += "API=${name.toLowerCase()}"
+                }
+            }
+        }
+
+        create("Riru") {
+            dimension = "api"
+        }
+
+        create("Zygisk") {
+            dimension = "api"
         }
     }
 }

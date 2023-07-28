@@ -2,8 +2,7 @@
 #define ZYGISKFRIDA_INJECT_H
 
 #include <string>
-#include "config.h"
 
-void inject_gadget(std::string const& gadget_path, std::unique_ptr<target_config> cfg);
+bool check_and_inject(std::string const& app_name);
 
 #endif  // ZYGISKFRIDA_INJECT_H

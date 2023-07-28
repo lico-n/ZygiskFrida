@@ -7,5 +7,6 @@ ext {
     moduleDescription = "Injects frida gadget via zygisk."
     moduleVersion = "v1.1.0"
     moduleVersionCode = 1
+    riruApiVersion = 26
     fridaVersion = "16.1.3"
 }

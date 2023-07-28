@@ -1,5 +1,7 @@
 SKIPUNZIP=1
 
+FLAVOR=@FLAVOR@
+
 TMP_MODULE_DIR=/data/local/tmp/re.zyg.fri
 
 if [ "$ARCH" != "arm" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x86" ] && [ "$ARCH" != "x64" ]; then
