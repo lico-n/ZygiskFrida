@@ -38,24 +38,6 @@ task downloadFrida(type: Download) {
     }
 }
 
-task prepareConfig(type: Copy) {
-    inputs.file("$rootDir/module.gradle")
-
-    from "$rootDir/template/config.h"
-    expand([
-            header           : "// DO NOT EDIT. Generated file from template/config.h. Values from module.gradle\n",
-            gadgetLibraryName: gadgetLibraryName,
-            modulePackageName: modulePackageName,
-    ])
-    into "$rootDir/module/src/jni"
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name.startsWith('buildNdkBuildRelease')) {
-        task.dependsOn prepareConfig
-    }
-}
-
 android {
     namespace = "zygisk.frida"
     compileSdkVersion rootProject.ext.targetSdkVersion
@@ -92,16 +74,6 @@ afterEvaluate {
             into magiskDir
             from(templatePath) {
                 exclude 'module.prop'
-                exclude 'uninstall.sh'
-                exclude 'customize.sh'
-            }
-            from(templatePath) {
-                include 'uninstall.sh'
-                include 'customize.sh'
-                expand([
-                        modulePackageName: modulePackageName,
-                        gadgetLibraryName: gadgetLibraryName
-                ])
             }
             from(templatePath) {
                 include 'module.prop'

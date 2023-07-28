@@ -4,7 +4,6 @@
 #include "inject.h"
 #include "log.h"
 #include "zygisk.h"
-#include "config.h"
 
 using zygisk::Api;
 using zygisk::AppSpecializeArgs;
@@ -22,8 +21,8 @@ class MyModule : public zygisk::ModuleBase {
         std::string app_name = std::string(raw_app_name);
         this->env->ReleaseStringUTFChars(args->nice_name, raw_app_name);
 
-        std::string module_dir = std::string("/data/local/tmp/") + ModulePackageName;
-        std::string gadget_path = module_dir + "/" + GadgetLibraryName;
+        std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
+        std::string gadget_path = module_dir + "/libgadget.so";
 
         if (!should_inject(module_dir, app_name)) {
             this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);

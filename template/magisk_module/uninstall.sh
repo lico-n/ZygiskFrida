@@ -1,1 +1,1 @@
-rm -rf /data/local/tmp/${modulePackageName}
+rm -rf /data/local/tmp/re.zyg.fri

@@ -7,15 +7,5 @@ ext {
     moduleDescription = "Injects frida gadget via zygisk."
     moduleVersion = "v1.1.0"
     moduleVersionCode = 1
-    modulePackageName = "re.zyg.fri"
-
-
-    // Gadget will be loaded with this name into the app process.
-    // Renaming it might help avoid detection.
     fridaVersion = "16.1.3"
-
-
-    // Gadget will be loaded with this name into the app process.
-    // Renaming it might help avoid detection.
-    gadgetLibraryName = "libgadget.so"
 }
