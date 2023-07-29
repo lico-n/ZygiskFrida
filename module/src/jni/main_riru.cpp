@@ -5,7 +5,6 @@
 
 #include "riru_config.h"
 #include "inject.h"
-#include "log.h"
 
 static std::string app_name = ""; // NOLINT
 

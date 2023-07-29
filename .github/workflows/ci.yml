@@ -27,4 +27,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ZygiskFrida
-          path: out/magisk_module_release/
+          path: out/*.zip

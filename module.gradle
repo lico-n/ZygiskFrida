@@ -1,12 +1,17 @@
 ext {
     // Magisk Module
-    moduleLibraryName = "zygiskfrida"
     magiskModuleId = "zygiskfrida"
     moduleName = "ZygiskFrida"
     moduleAuthor = "lico-n"
     moduleDescription = "Injects frida gadget via zygisk."
-    moduleVersion = "v1.1.0"
-    moduleVersionCode = 1
-    riruApiVersion = 26
+    moduleVersion = "v1.2.0"
+    moduleVersionCode = 3
+
+    // Riru
+    moduleMinRiruApiVersion = 24
+    moduleMinRiruVersionName = "24.0.0"
+    moduleMaxRiruApiVersion = 26
+
+    // Frida
     fridaVersion = "16.1.3"
 }
