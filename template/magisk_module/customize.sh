@@ -16,7 +16,7 @@ extract() {
   unzip -oj "$zip" "$file" -d "$dir" >&2
 }
 
-mkdir "$MODPATH/zygisk"
+mkdir -p "$MODPATH/zygisk"
 mkdir -p "$TMP_MODULE_DIR"
 extract "$ZIPFILE" 'module.prop' "$MODPATH"
 extract "$ZIPFILE" 'uninstall.sh' "$MODPATH"

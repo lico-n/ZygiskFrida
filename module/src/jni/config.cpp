@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-std::vector<std::string> split(std::string str, char delimiter) {
+static std::vector<std::string> split(std::string str, char delimiter) {
     std::vector<std::string> result;
     std::stringstream ss(str);
 
@@ -16,8 +16,8 @@ std::vector<std::string> split(std::string str, char delimiter) {
     return result;
 }
 
-target_config* parse_target_config(std::string line) {
-    auto tcfg = new target_config;
+static std::unique_ptr<target_config> parse_target_config(std::string line) {
+    std::unique_ptr<target_config> tcfg (new target_config);
 
     auto parts = split(line, ',');
 
@@ -32,7 +32,7 @@ target_config* parse_target_config(std::string line) {
     return tcfg;
 }
 
-target_config* load_config(std::string const& module_dir, std::string const& app_name) {
+std::unique_ptr<target_config> load_config(std::string const& module_dir, std::string const& app_name) {
     auto config_file_path = module_dir + "/target_packages";
 
     std::ifstream config_file(config_file_path);
@@ -42,7 +42,7 @@ target_config* load_config(std::string const& module_dir, std::string const& app
 
     std::string line;
     while (getline(config_file, line)) {
-        target_config* cfg = parse_target_config(line);
+        auto cfg = parse_target_config(line);
         if (cfg->app_name == app_name) {
             return cfg;
         }

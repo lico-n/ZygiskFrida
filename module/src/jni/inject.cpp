@@ -1,6 +1,7 @@
 #include "inject.h"
 
 #include <chrono>
+#include <cinttypes>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -8,12 +9,11 @@
 #include <thread>
 
 #include "config.h"
-#include "inttypes.h"
 #include "log.h"
 #include "xdl.h"
 
 
-std::string get_process_name() {
+static std::string get_process_name() {
     auto path = "/proc/self/cmdline";
 
     std::ifstream file(path);
@@ -23,7 +23,7 @@ std::string get_process_name() {
     return buffer.str();
 }
 
-void wait_for_init(std::string const& app_name) {
+static void wait_for_init(std::string const& app_name) {
     LOGI("Wait for process to complete init");
 
     // wait until the process is renamed to the package name
@@ -37,15 +37,15 @@ void wait_for_init(std::string const& app_name) {
     LOGI("Process init completed");
 }
 
-void delay_start_up(target_config *cfg) {
-    if (cfg->start_up_delay <= 0) {
+static void delay_start_up(uint64_t start_up_delay) {
+    if (start_up_delay <= 0) {
         return;
     }
 
-    LOGI("Waiting for configured start up delay %" PRIu64"ms", cfg->start_up_delay);
+    LOGI("Waiting for configured start up delay %" PRIu64"ms", start_up_delay);
 
     int countdown = 0;
-    uint64_t delay = cfg->start_up_delay;
+    uint64_t delay = start_up_delay;
 
     for (int i = 0; i < 10 && delay > 1000; i++) {
         delay -= 1000;
@@ -60,14 +60,14 @@ void delay_start_up(target_config *cfg) {
     }
 }
 
-void inject_gadget(std::string const& gadget_path, target_config* cfg) {
+void inject_gadget(std::string const& gadget_path, std::unique_ptr<target_config> cfg) {
     // We need to wait for process initialization to complete.
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
     // undiscoverable or otherwise cause issue attaching.
     wait_for_init(cfg->app_name);
 
-    delay_start_up(cfg);
+    delay_start_up(cfg->start_up_delay);
 
     LOGI("Starting gadget %s", gadget_path.c_str());
     auto *handle = xdl_open(gadget_path.c_str(), XDL_ALWAYS_FORCE_LOAD);
@@ -76,7 +76,5 @@ void inject_gadget(std::string const& gadget_path, target_config* cfg) {
     } else {
         LOGE("Failed to start gadget: %s", dlerror());
     }
-
-    delete cfg;
 }
 

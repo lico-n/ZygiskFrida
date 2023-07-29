@@ -25,7 +25,7 @@ class MyModule : public zygisk::ModuleBase {
         std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
         std::string gadget_path = module_dir + "/libgadget.so";
 
-        auto cfg = load_config(module_dir, app_name);
+        std::unique_ptr<target_config> cfg = load_config(module_dir, app_name);
         if (cfg == nullptr) {
             this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
             return;
@@ -33,7 +33,7 @@ class MyModule : public zygisk::ModuleBase {
 
         LOGI("App detected: %s", app_name.c_str());
 
-        std::thread inject_thread(inject_gadget, gadget_path, cfg);
+        std::thread inject_thread(inject_gadget, gadget_path, std::move(cfg));
         inject_thread.detach();
     }
 

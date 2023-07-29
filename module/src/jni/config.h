@@ -9,6 +9,6 @@ struct target_config{
     uint64_t start_up_delay;
 };
 
-target_config* load_config(std::string const& module_dir, std::string const& app_name);
+std::unique_ptr<target_config> load_config(std::string const& module_dir, std::string const& app_name);
 
 #endif  // ZYGISKFRIDA_CONFIG_H
