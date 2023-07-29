@@ -14,10 +14,14 @@ more stealthy way.
 - The process is not being ptraced like it is with frida-server. Avoiding ptrace based detection.
 - Control about the injection time of the gadget.
 
+This repo also provides a [Riru](https://github.com/RikkaApps/Riru) flavor in case you are still
+using riru with an older magisk version rather than zygisk.
+
 ## How to use the module
 
 ### General Usage
-- Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)
+- Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)\
+  If you are using riru instead of zygisk choose the riru-release. Otherwise choose the normal version.
 - Transfer the ZygiskFrida zip file to your device and install it via Magisk.
 - Reboot after install
 - Update `/data/local/tmp/re.zyg.fri/target_packages` on your device with the target package names.\
@@ -39,6 +43,9 @@ You can provide it separated by a comma from the package_name.
 f.e. `adb shell 'su -c "echo com.example.package,20000 > /data/local/tmp/re.zyg.fri/target_packages"'`
 would inject the gadget after a delay of 20 seconds.
 
+You get a 10 seconds countdown to injection time in the ZygiskFrida logs `adb logcat -S ZygiskFrida`.
+This can help time if you want to time the injection with app interactions. 
+
 **Gadget version and config**
 
 The gadget started is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
@@ -50,13 +57,11 @@ replace the `libgadget.so` with your own frida gadget.
 
 ## How to build
 
-Building the project yourself allows you to rename things making it more stealthy.
-
 - Checkout the project
 - Run `./gradlew :module:assembleRelease`
 - The build magisk module should then be in the `out` directory.
 
-You can also build and install the module with `./gradlew :module:flashAndRebootRelease`
+You can also build and install the module to your device directly with `./gradlew :module:flashAndRebootZygiskRelease`
 
 ## Caveats
 

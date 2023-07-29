@@ -1,7 +1,5 @@
 #include <string>
-#include <thread>
 
-#include "config.h"
 #include "inject.h"
 #include "log.h"
 #include "zygisk.h"
@@ -18,23 +16,13 @@ class MyModule : public zygisk::ModuleBase {
     }
 
     void postAppSpecialize(const AppSpecializeArgs *args) override {
-        const char* raw_app_name = env->GetStringUTFChars(args->nice_name, nullptr);
+        const char *raw_app_name = env->GetStringUTFChars(args->nice_name, nullptr);
         std::string app_name = std::string(raw_app_name);
         this->env->ReleaseStringUTFChars(args->nice_name, raw_app_name);
 
-        std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
-        std::string gadget_path = module_dir + "/libgadget.so";
-
-        std::unique_ptr<target_config> cfg = load_config(module_dir, app_name);
-        if (cfg == nullptr) {
+        if (!check_and_inject(app_name)) {
             this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
-            return;
         }
-
-        LOGI("App detected: %s", app_name.c_str());
-
-        std::thread inject_thread(inject_gadget, gadget_path, std::move(cfg));
-        inject_thread.detach();
     }
 
  private:

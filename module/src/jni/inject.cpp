@@ -12,7 +12,6 @@
 #include "log.h"
 #include "xdl.h"
 
-
 static std::string get_process_name() {
     auto path = "/proc/self/cmdline";
 
@@ -60,7 +59,7 @@ static void delay_start_up(uint64_t start_up_delay) {
     }
 }
 
-void inject_gadget(std::string const& gadget_path, std::unique_ptr<target_config> cfg) {
+void inject_gadget(std::string const gadget_path, std::unique_ptr<target_config> cfg) {
     // We need to wait for process initialization to complete.
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
@@ -78,3 +77,19 @@ void inject_gadget(std::string const& gadget_path, std::unique_ptr<target_config
     }
 }
 
+bool check_and_inject(std::string const& app_name) {
+    std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
+    std::string gadget_path = module_dir + "/libgadget.so";
+
+    std::unique_ptr<target_config> cfg = load_config(module_dir, app_name);
+    if (cfg == nullptr) {
+        return false;
+    }
+
+    LOGI("App detected: %s", app_name.c_str());
+
+    std::thread inject_thread(inject_gadget, gadget_path, std::move(cfg));
+    inject_thread.detach();
+
+    return true;
+}

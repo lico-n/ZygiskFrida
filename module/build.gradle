@@ -1,7 +1,9 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
+import org.apache.tools.ant.filters.ReplaceTokens
 
 import java.nio.file.Paths
 import java.nio.file.Files
+import java.security.MessageDigest
 
 plugins {
     id "de.undercouch.download" version "5.4.0"
@@ -12,6 +14,7 @@ apply from: file(rootProject.file('module.gradle'))
 
 dependencies {
     implementation 'dev.rikka.ndk.thirdparty:cxx:1.2.0'
+    implementation("dev.rikka.ndk:riru:26.0.0")
 }
 
 task downloadFrida(type: Download) {
@@ -42,9 +45,21 @@ android {
     namespace = "zygisk.frida"
     compileSdkVersion rootProject.ext.targetSdkVersion
     ndkVersion '25.2.9519653'
+
+    flavorDimensions += "api"
+
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+
+        externalNativeBuild {
+            ndkBuild {
+                arguments += "MODULE_VERSION_CODE=$moduleVersionCode"
+                arguments += "MODULE_VERSION_NAME=$moduleVersion"
+                arguments += "RIRU_API_VERSION=$moduleMaxRiruApiVersion"
+            }
+        }
+
     }
     buildFeatures {
         prefab true
@@ -55,15 +70,37 @@ android {
             path "src/jni/Android.mk"
         }
     }
+
+    productFlavors {
+        all {
+            externalNativeBuild {
+                ndkBuild {
+                    arguments += "API=${name.toLowerCase()}"
+                }
+            }
+        }
+
+        create("Riru") {
+            dimension = "api"
+        }
+
+        create("Zygisk") {
+            dimension = "api"
+        }
+    }
 }
 
 afterEvaluate {
     android.libraryVariants.forEach { variant ->
         def variantCapped = variant.name.capitalize()
         def variantLowered = variant.name.toLowerCase()
+        def buildTypeCapped = variant.buildType.name.capitalize()
+        def buildTypeLowered = variant.buildType.name.toLowerCase()
+        def flavorCapped = variant.flavorName.capitalize()
+        def flavorLowered = variant.flavorName.toLowerCase()
 
-        def zipName = "${moduleName}-${moduleVersion}-${variantLowered}.zip"
-        def magiskDir = file("$outDir/magisk_module_$variantLowered")
+        def zipName = "${moduleName}-${moduleVersion}-${flavorLowered}-${buildTypeLowered}.zip"
+        def magiskDir = file("${outDir}/magisk_module_${flavorLowered}_${buildTypeLowered}")
 
         task("prepareMagiskFiles${variantCapped}", type: Sync) {
             dependsOn("assemble$variantCapped")
@@ -74,6 +111,9 @@ afterEvaluate {
             into magiskDir
             from(templatePath) {
                 exclude 'module.prop'
+                exclude 'riru.sh'
+                exclude 'customize.sh'
+                exclude 'verify.sh'
             }
             from(templatePath) {
                 include 'module.prop'
@@ -83,27 +123,58 @@ afterEvaluate {
                         version    : moduleVersion,
                         versionCode: moduleVersionCode.toString(),
                         author     : moduleAuthor,
-                        description: moduleDescription,
+                        description: moduleDescription + " (flavor: $flavorLowered)",
                 ])
-                filter(FixCrLfFilter.class,
-                        eol: FixCrLfFilter.CrLf.newInstance("lf"))
+                filter(FixCrLfFilter.class, eol: FixCrLfFilter.CrLf.newInstance("lf"))
             }
-            from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib") {
+            from(templatePath) {
+                include("customize.sh")
+                include("verify.sh")
+                def tokens = [
+                        "FLAVOR" : flavorLowered,
+                        "MODULE_ID": magiskModuleId,
+                ]
+                filter(ReplaceTokens.class, tokens: tokens)
+                filter(FixCrLfFilter.class, eol: FixCrLfFilter.CrLf.newInstance("lf"))
+            }
+            from("$buildDir/intermediates/stripped_native_libs/$variantCapped/out/lib") {
                 into 'lib'
             }
             from("$rootDir/gadget") {
                 exclude '.gitkeep'
                 into 'gadget'
             }
+            if (flavorLowered == "riru") {
+                from(templatePath) {
+                    include("riru.sh")
+                    def tokens = [
+                            "RIRU_MODULE_LIB_NAME"              : "zygiskfrida",
+                            "RIRU_MODULE_API_VERSION"           : moduleMaxRiruApiVersion.toString(),
+                            "RIRU_MODULE_MIN_API_VERSION"       : moduleMinRiruApiVersion.toString(),
+                            "RIRU_MODULE_MIN_RIRU_VERSION_NAME" : moduleMinRiruVersionName,
+                    ]
+                    filter(ReplaceTokens.class, tokens: tokens)
+                    filter(FixCrLfFilter.class, eol: FixCrLfFilter.CrLf.newInstance("lf"))
+                }
+            }
             doLast {
-                file("$magiskDir/zygisk").mkdir()
                 fileTree("$magiskDir/lib").visit { f ->
                     if (!f.directory) return
-                    def srcPath = Paths.get("${f.file.absolutePath}/lib${moduleLibraryName}.so")
-                    def dstPath = Paths.get("$magiskDir/zygisk/${f.path}.so")
+                    def srcPath = Paths.get("${f.file.absolutePath}/libzygiskfrida.so")
+                    def dstPath = Paths.get("$magiskDir/lib/${f.path}.so")
                     Files.move(srcPath, dstPath)
+                    new File("$magiskDir/lib/${f.path}").deleteDir()
                 }
-                new File("$magiskDir/lib").deleteDir()
+
+                fileTree("$magiskDir").visit { f ->
+                    if (f.directory) return
+
+                    def md = MessageDigest.getInstance("SHA-256")
+                    f.file.eachByte 4096, { bytes, size ->
+                        md.update(bytes, 0, size)
+                    }
+                    file(f.file.path + ".sha256sum").text = md.digest().encodeHex()
+                }
             }
         }
 

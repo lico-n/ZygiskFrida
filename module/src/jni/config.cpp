@@ -3,8 +3,9 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
-static std::vector<std::string> split(std::string str, char delimiter) {
+static std::vector<std::string> split(std::string const& str, char delimiter) {
     std::vector<std::string> result;
     std::stringstream ss(str);
 
@@ -16,7 +17,7 @@ static std::vector<std::string> split(std::string str, char delimiter) {
     return result;
 }
 
-static std::unique_ptr<target_config> parse_target_config(std::string line) {
+static std::unique_ptr<target_config> parse_target_config(std::string const& line) {
     std::unique_ptr<target_config> tcfg (new target_config);
 
     auto parts = split(line, ',');
