@@ -8,11 +8,12 @@ APP_STL=none
 LOCAL_MODULE := zygiskfrida
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/xdl/include $(LOCAL_PATH)/include
 LOCAL_SRC_FILES := inject.cpp config.cpp riru_config.cpp $(XDL_FILES:$(LOCAL_PATH)/%=%)
-LOCAL_STATIC_LIBRARIES := cxx riru
+LOCAL_STATIC_LIBRARIES := cxx
 LOCAL_LDLIBS := -llog
 
 ifeq ($(API), riru)
 LOCAL_SRC_FILES += main_riru.cpp
+LOCAL_STATIC_LIBRARIES += riru
 else
 LOCAL_SRC_FILES  += main_zygisk.cpp
 endif
