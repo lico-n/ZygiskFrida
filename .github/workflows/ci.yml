@@ -31,9 +31,9 @@ jobs:
           echo "version=$MODULE_VERSION" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v3
         with:
-          name: ZygiskFrida-${{ steps.module-version.outputs.version }}-release.zip
+          name: ZygiskFrida-${{ steps.module-version.outputs.version }}-release
           path: out/magisk_module_zygisk_release
       - uses: actions/upload-artifact@v3
         with:
-          name: ZygiskFrida-${{ steps.module-version.outputs.version }}-riru-release.zip
+          name: ZygiskFrida-${{ steps.module-version.outputs.version }}-riru-release
           path: out/magisk_module_riru_release
