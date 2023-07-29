@@ -24,7 +24,16 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew :module:assembleRelease
+      - name: Get Module Version
+        id: module-version
+        run: |
+          MODULE_VERSION=$(cat module.gradle | grep "moduleVersion =" | awk -F'"' '{print $2}')
+          echo "version=$MODULE_VERSION" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v3
         with:
-          name: ZygiskFrida
-          path: out/*.zip
+          name: ZygiskFrida-${{ steps.module-version.outputs.version }}-release.zip
+          path: out/magisk_module_zygisk_release
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ZygiskFrida-${{ steps.module-version.outputs.version }}-riru-release.zip
+          path: out/magisk_module_riru_release
