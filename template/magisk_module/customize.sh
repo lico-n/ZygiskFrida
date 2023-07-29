@@ -55,8 +55,8 @@ mkdir -p "$LIB64_DEST"
 
 ui_print "- Extracting 32-bit libraries"
 extract "$ZIPFILE" "lib/$LIB32_NAME" "$LIB32_DEST" true
-
 [ "$FLAVOR" = "riru" ] && mv "$LIB32_DEST/$LIB32_NAME" "${LIB32_DEST}/lib${MODULE_ID}.so"
+
 if [ "$IS64BIT" = true ]; then
   ui_print "- Extracting 64-bit libraries"
   extract "$ZIPFILE" "lib/$LIB64_NAME" "$LIB64_DEST" true

@@ -113,6 +113,7 @@ afterEvaluate {
                 exclude 'module.prop'
                 exclude 'riru.sh'
                 exclude 'customize.sh'
+                exclude 'verify.sh'
             }
             from(templatePath) {
                 include 'module.prop'
@@ -128,6 +129,7 @@ afterEvaluate {
             }
             from(templatePath) {
                 include("customize.sh")
+                include("verify.sh")
                 def tokens = [
                         "FLAVOR" : flavorLowered,
                         "MODULE_ID": magiskModuleId,
