@@ -94,10 +94,6 @@ You can also build and install the module to your device directly with `./gradle
 
 - For emulators this will start the gadget in native realm. This means that you will be able to hook Java but not native functions.
 
-- This is not yet tested very well on different devices.\
-  In case this is not working reports with logs `adb logcat -S ZygiskFrida` are welcome.
-
-
 ## Credits
 
 - Inspired by https://github.com/Perfare/Zygisk-Il2CppDumper
