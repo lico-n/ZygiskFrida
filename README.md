@@ -13,6 +13,7 @@ more stealthy way.
 - The gadget is not embedded into the APK itself. So APK Integrity/Signature checks will still pass.
 - The process is not being ptraced like it is with frida-server. Avoiding ptrace based detection.
 - Control about the injection time of the gadget.
+- Allows you to load multiple arbitrary libraries into the process.
 
 This repo also provides a [Riru](https://github.com/RikkaApps/Riru) flavor in case you are still
 using riru with an older magisk version rather than zygisk.
@@ -40,20 +41,46 @@ might run checks at start up and delaying the injection can help avoid these.
 `/data/local/tmp/re.zyg.fri/target_packages` accepts a start up delay in milliseconds.
 You can provide it separated by a comma from the package_name.
 
-f.e. `adb shell 'su -c "echo com.example.package,20000 > /data/local/tmp/re.zyg.fri/target_packages"'`
+f.e.
+```
+adb shell 'su -c "echo com.example.package,20000 > /data/local/tmp/re.zyg.fri/target_packages"'
+```
 would inject the gadget after a delay of 20 seconds.
 
-You get a 10 seconds countdown to injection time in the ZygiskFrida logs `adb logcat -S ZygiskFrida`.
-This can help time if you want to time the injection with app interactions. 
+You get a 10 seconds countdown to injection in the ZygiskFrida logs `adb logcat -S ZygiskFrida`.
+This can help if you want to time the injection with app interactions.
 
 **Gadget version and config**
 
-The gadget started is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
-You can follow the [Gadget Docs](https://frida.re/docs/gadget/) and add an additional
+The bundled gadget is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
+You can follow the [Gadget Docs](https://frida.re/docs/gadget/) and add additional
 gadget config and scripts in that location.
 
 In case you want to use a different gadget version than the one bundled, you can simply
 replace the `libgadget.so` with your own frida gadget.
+
+**Loading arbitrary libraries**
+
+This module also allows you to load arbitrary .so libraries into the process.\
+This can allow you to load additional helper libraries for the gadget or
+enable any other use case that might need libraries loaded into the app process.
+
+For this you can add the file `/data/local/tmp/re.zyg.fri/injected_libraries`.\
+The file should consist of file paths to libraries.
+The libraries are loaded in the order they are specified in the file.
+
+Example file content that would first load libhelperexample.so and then the bundled frida-gadget:
+```
+/data/local/tmp/re.zyg.fri/libhelperexample.so
+/data/local/tmp/re.zyg.fri/libgadget.so
+```
+
+Make sure the libraries are located somewhere accessible by the app and that
+file permissions are properly set.
+
+If you want the frida gadget to start, you need to explicitly specify the bundled frida-gadget at
+`/data/local/tmp/re.zyg.fri/libgadget.so`.\
+You can also choose to specify your own gadget this way or omit the gadget altogether.
 
 ## How to build
 
@@ -66,10 +93,6 @@ You can also build and install the module to your device directly with `./gradle
 ## Caveats
 
 - For emulators this will start the gadget in native realm. This means that you will be able to hook Java but not native functions.
-
-- This is not yet tested very well on different devices.\
-  In case this is not working reports with logs `adb logcat -S ZygiskFrida` are welcome.
-
 
 ## Credits
 
