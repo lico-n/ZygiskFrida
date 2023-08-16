@@ -68,6 +68,7 @@ ui_print "- Extracting bundled frida gadget"
 mkdir -p "$TMP_MODULE_DIR"
 extract "$ZIPFILE" "gadget/libgadget-$ARCH.so.xz" "$TMP_MODULE_DIR" true
 mv "$TMP_MODULE_DIR/libgadget-$ARCH.so.xz" "$TMP_MODULE_DIR/libgadget.so.xz"
+rm "$TMP_MODULE_DIR/libgadget.so"
 /data/adb/magisk/busybox unxz "$TMP_MODULE_DIR/libgadget.so.xz"
 rm "$TMP_MODULE_DIR/libgadget.so.xz"
 
