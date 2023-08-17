@@ -72,7 +72,6 @@ rm "$TMP_MODULE_DIR/libgadget.so"
 /data/adb/magisk/busybox unxz "$TMP_MODULE_DIR/libgadget.so.xz"
 rm "$TMP_MODULE_DIR/libgadget.so.xz"
 
-touch "$TMP_MODULE_DIR/target_packages"
 extract "$ZIPFILE" "config.json.example" "$TMP_MODULE_DIR" true
 
 set_perm_recursive "$TMP_MODULE_DIR" 0 0 0755 0644

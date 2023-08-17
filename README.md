@@ -25,11 +25,14 @@ using riru with an older magisk version rather than zygisk.
   If you are using riru instead of zygisk choose the riru-release. Otherwise choose the normal version.
 - Transfer the ZygiskFrida zip file to your device and install it via Magisk.
 - Reboot after install
-- Update `/data/local/tmp/re.zyg.fri/target_packages` on your device with the target package names.\
-  Apps with matching package names will be injected with the gadget. One package name per line.\
-  f.e. `adb shell 'su -c "echo com.example.package > /data/local/tmp/re.zyg.fri/target_packages"'`
+- Create the config file and adjust the package name to your target app.
+  f.e.
+```shell
+adb shell 'su -c cp /data/local/tmp/re.zyg.fri/config.json.example /data/local/tmp/re.zyg.fri/config.json'
+adb shell 'su -c sed -i s/com.example.package/your.target.application/ /data/local/tmp/re.zyg.fri/config.json'
+```
 - Launch your app. It will pause at startup allowing you to attach
-  f.e. `frida -U -N com.example.package` or `frida -U -n Gadget`
+  f.e. `frida -U -N your.target.application` or `frida -U -n Gadget`
 
 This assumes that you don't have any other frida server running (f.e. by using MagiskFrida).
 You can still run it together with frida-server but you would have to configure the gadget

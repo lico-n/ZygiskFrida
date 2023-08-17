@@ -4,6 +4,8 @@ For the previous configuration method with various file, see [simple config](sim
 It remains a valid method of configuration but the structured configuration method is the preferred
 method in the future and also supports more features.
 
+Both configuration are supported with the advanced config taking precedence in case an app appears in both.
+
 ## Config File
 
 This module is configured via a json config located at `/data/local/tmp/re.zyg.fri/config.json`.
