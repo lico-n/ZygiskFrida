@@ -63,7 +63,8 @@ There are times that you might want to delay the injection of the gadget. Some a
 might run checks at start up and delaying the injection can help avoid these.
 
 ### injected_libraries
-These are the libraries that will be injected into the process.
+These are the libraries that will be injected into the process. The libraries
+specified here will be loaded in the order of the array.
 
 The module includes a bundled frida gadget at `/data/local/tmp/re.zyg.fri/libgadget.so`.
 You can adjust the gadget config according to the official [Gadget Doc](https://frida.re/docs/gadget/)
@@ -72,9 +73,9 @@ If you want to use a different frida version or an alternative version you can r
 with the path to your own gadget.
 
 Using this you can also inject arbitrary libraries alongside the gadget or without the gadget if
-you remove it.\
+you remove it.
 Make sure that the libraries you provide here have the correct file permissions set and are accessible
-by the app itself.\
+by the app itself.
 
 The module will setup file permissions in the complete `re.zyg.fri` directory on install. If you suspect
 a file permission issue, an easy way to check is to place your libraies within the `re.zyg.fri` directory
