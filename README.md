@@ -20,67 +20,29 @@ using riru with an older magisk version rather than zygisk.
 
 ## How to use the module
 
-### General Usage
+### Quick start
 - Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)\
   If you are using riru instead of zygisk choose the riru-release. Otherwise choose the normal version.
 - Transfer the ZygiskFrida zip file to your device and install it via Magisk.
 - Reboot after install
-- Update `/data/local/tmp/re.zyg.fri/target_packages` on your device with the target package names.\
-  Apps with matching package names will be injected with the gadget. One package name per line.\
-  f.e. `adb shell 'su -c "echo com.example.package > /data/local/tmp/re.zyg.fri/target_packages"'`
+- Create the config file and adjust the package name to your target app (replace `your.target.application` in the commands)
+```shell
+adb shell 'su -c cp /data/local/tmp/re.zyg.fri/config.json.example /data/local/tmp/re.zyg.fri/config.json'
+adb shell 'su -c sed -i s/com.example.package/your.target.application/ /data/local/tmp/re.zyg.fri/config.json'
+```
 - Launch your app. It will pause at startup allowing you to attach
-  f.e. `frida -U -N com.example.package` or `frida -U -n Gadget`
+  f.e. `frida -U -N your.target.application` or `frida -U -n Gadget`
 
-### Further configuration
+This assumes that you don't have any other frida server running (f.e. by using MagiskFrida).
+You can still run it together with frida-server but you would have to configure the gadget
+to use a different port.
 
-**Start up delay**
+### Configuration
 
-There are times that you might want to delay the injection of the gadget. Some applications
-might run checks at start up and delaying the injection can help avoid these.
+This module also supports adding a start up delay that can delay injection of the gadget to
+avoid checks run at startup time, loading arbitrary libraries and child gating.
 
-`/data/local/tmp/re.zyg.fri/target_packages` accepts a start up delay in milliseconds.
-You can provide it separated by a comma from the package_name.
-
-f.e.
-```
-adb shell 'su -c "echo com.example.package,20000 > /data/local/tmp/re.zyg.fri/target_packages"'
-```
-would inject the gadget after a delay of 20 seconds.
-
-You get a 10 seconds countdown to injection in the ZygiskFrida logs `adb logcat -S ZygiskFrida`.
-This can help if you want to time the injection with app interactions.
-
-**Gadget version and config**
-
-The bundled gadget is located at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
-You can follow the [Gadget Docs](https://frida.re/docs/gadget/) and add additional
-gadget config and scripts in that location.
-
-In case you want to use a different gadget version than the one bundled, you can simply
-replace the `libgadget.so` with your own frida gadget.
-
-**Loading arbitrary libraries**
-
-This module also allows you to load arbitrary .so libraries into the process.\
-This can allow you to load additional helper libraries for the gadget or
-enable any other use case that might need libraries loaded into the app process.
-
-For this you can add the file `/data/local/tmp/re.zyg.fri/injected_libraries`.\
-The file should consist of file paths to libraries.
-The libraries are loaded in the order they are specified in the file.
-
-Example file content that would first load libhelperexample.so and then the bundled frida-gadget:
-```
-/data/local/tmp/re.zyg.fri/libhelperexample.so
-/data/local/tmp/re.zyg.fri/libgadget.so
-```
-
-Make sure the libraries are located somewhere accessible by the app and that
-file permissions are properly set.
-
-If you want the frida gadget to start, you need to explicitly specify the bundled frida-gadget at
-`/data/local/tmp/re.zyg.fri/libgadget.so`.\
-You can also choose to specify your own gadget this way or omit the gadget altogether.
+Please take a look at the [configuration guide](docs/advanced_config.md) for this.
 
 ## How to build
 

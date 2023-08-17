@@ -12,6 +12,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "child_gating.h"
 #include "xdl.h"
 
 static std::string get_process_name() {
@@ -61,20 +62,24 @@ static void delay_start_up(uint64_t start_up_delay_ms) {
     }
 }
 
-void inject_libs(std::unique_ptr<target_config> cfg) {
+static void inject_libs(target_config const& cfg) {
     // We need to wait for process initialization to complete.
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
     // undiscoverable or otherwise cause issue attaching.
-    wait_for_init(cfg->app_name);
+    wait_for_init(cfg.app_name);
 
-    delay_start_up(cfg->start_up_delay_ms);
+    if (cfg.child_gating.enabled) {
+        enable_child_gating(cfg.child_gating);
+    }
 
-    for (auto & lib_path : cfg->injected_libraries) {
+    delay_start_up(cfg.start_up_delay_ms);
+
+    for (auto & lib_path : cfg.injected_libraries) {
         LOGI("Injecting %s", lib_path.c_str());
         auto *handle = xdl_open(lib_path.c_str(), XDL_TRY_FORCE_LOAD);
         if (handle) {
-            LOGI("Injected %s", lib_path.c_str());
+            LOGI("Injected %s with handle %p", lib_path.c_str(), handle);
         } else {
             LOGE("Failed to inject %s : %s", lib_path.c_str(), dlerror());
         }
@@ -84,20 +89,20 @@ void inject_libs(std::unique_ptr<target_config> cfg) {
 bool check_and_inject(std::string const &app_name) {
     std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
 
-    std::unique_ptr<target_config> cfg = load_config(module_dir, app_name);
-    if (cfg == nullptr) {
+    std::optional<target_config> cfg = load_config(module_dir, app_name);
+    if (!cfg.has_value()) {
         return false;
     }
 
     LOGI("App detected: %s", app_name.c_str());
 
-    if (cfg->injected_libraries.empty()) {
-        LOGI("No libraries configured for injection. "
-             "Check the content of the `injected_libraries` file or delete it.");
+    auto target_config = cfg.value();
+    if (!target_config.enabled) {
+        LOGI("Injection disabled for %s", app_name.c_str());
         return false;
     }
 
-    std::thread inject_thread(inject_libs, std::move(cfg));
+    std::thread inject_thread(inject_libs, target_config);
     inject_thread.detach();
 
     return true;

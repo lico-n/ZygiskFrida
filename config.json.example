@@ -1,0 +1,23 @@
+{
+    "targets": [
+        {
+            "app_name" : "com.example.package",
+            "enabled": true,
+            "start_up_delay_ms": 0,
+            "injected_libraries": [
+                {
+                    "path": "/data/local/tmp/re.zyg.fri/libgadget.so"
+                }
+            ],
+            "child_gating": {
+                "enabled": false,
+                "mode": "freeze",
+                "injected_libraries" : [
+                    {
+                        "path": "/data/local/tmp/re.zyg.fri/libgadget-child.so"
+                    }
+                ]
+            }
+        }
+    ]
+}

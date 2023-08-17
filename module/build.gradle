@@ -15,6 +15,7 @@ apply from: file(rootProject.file('module.gradle'))
 dependencies {
     implementation 'dev.rikka.ndk.thirdparty:cxx:1.2.0'
     implementation("dev.rikka.ndk:riru:26.0.0")
+    implementation("io.github.vvb2060.ndk:dobby:1.2")
 }
 
 task downloadFrida(type: Download) {
@@ -109,6 +110,9 @@ afterEvaluate {
             def templatePath = "$rootDir/template/magisk_module"
 
             into magiskDir
+            from(rootDir) {
+                include 'config.json.example'
+            }
             from(templatePath) {
                 exclude 'module.prop'
                 exclude 'riru.sh'
