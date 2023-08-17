@@ -1,7 +1,7 @@
 # Advanced Config
 
-For the previous configuration method with various file, see [simple config](simple_config.md).
-It remains a valid method of configuration but the structured configuration method is the preferred
+For the previous configuration method with various files, see [simple config](simple_config.md).
+It remains a valid method of configuration but the structured configuration method specified here is the preferred
 method in the future and also supports more features.
 
 Both configuration are supported with the advanced config taking precedence in case an app appears in both.
@@ -46,32 +46,32 @@ you want to inject with frida.
 
 In case things are not working as expected, check `adb logcat -s ZygiskFrida` to see if an error is logged.
 
-### Target configuration.
+## Target configuration.
 
-**app_name**\
+##### app_name
 The bundle id of the application you want to inject frida into.
 
-**enabled**\
+##### enabled
 If this target is enabled. If set to false, then this module will ignore this configuration.
 This is useful if you want to temporarily disable a target while maintaining the config.
 
 
-**start_up_delay_ms**\
+##### start_up_delay_ms
 Injection of libraries is delayed by this amount in milliseconds.
 
 There are times that you might want to delay the injection of the gadget. Some applications
 might run checks at start up and delaying the injection can help avoid these.
 
-**injected_libraries**\
+##### injected_libraries
 These are the libraries that will be injected into the process.
 
-The module includes a bundled frida gadget at `/data/local/tmp/re.zyg.fri/libgadget.so` that
-will be started in this example config.
+The module includes a bundled frida gadget at `/data/local/tmp/re.zyg.fri/libgadget.so`.
+You can adjust the gadget config according to the official [Gadget Doc](https://frida.re/docs/gadget/)
 
 If you want to use a different frida version or an alternative version you can replace this
 with the path to your own gadget.
 
-Using this you can also injected arbitrary libraries alongside the gadget or without the gadget if
+Using this you can also inject arbitrary libraries alongside the gadget or without the gadget if
 you remove it.\
 Make sure that the libraries you provide here have the correct file permissions set and are accessible
 by the app itself.\
@@ -81,8 +81,7 @@ a file permission issue, an easy way to check is to place your libraies within t
 and install the module again (without uninstalling).
 
 
-### Child gating configuration (experimental)
-
+## Child gating configuration (experimental)
 This is an experimental feature and has a lot of caveats! Please read carefully.
 
 This module is able to intercept fork/vfork within the process to instrument child processes.

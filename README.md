@@ -25,8 +25,7 @@ using riru with an older magisk version rather than zygisk.
   If you are using riru instead of zygisk choose the riru-release. Otherwise choose the normal version.
 - Transfer the ZygiskFrida zip file to your device and install it via Magisk.
 - Reboot after install
-- Create the config file and adjust the package name to your target app.
-  f.e.
+- Create the config file and adjust the package name to your target app  f.e.
 ```shell
 adb shell 'su -c cp /data/local/tmp/re.zyg.fri/config.json.example /data/local/tmp/re.zyg.fri/config.json'
 adb shell 'su -c sed -i s/com.example.package/your.target.application/ /data/local/tmp/re.zyg.fri/config.json'
