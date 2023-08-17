@@ -1,3 +1,19 @@
+# Simple Config
+
+Please consider using the [structured config](advanced_config.md) instead.
+
+This file is about the previous configuration method via different files
+using `target_packages` and `injected_libraries` and doesn't support all the
+features.
+
+`/data/local/tmp/re.zyg.fri/target_packages` is a simple text file
+containing all the package names you want to inject frida into.
+
+It accepts one package name per line f.e.
+```
+adb shell 'su -c "echo com.example.package > /data/local/tmp/re.zyg.fri/target_packages"'
+```
+
 **Start up delay**
 
 There are times that you might want to delay the injection of the gadget. Some applications
