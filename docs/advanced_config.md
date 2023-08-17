@@ -151,5 +151,5 @@ child gadget started on.
 Then you can connect it for example via
 ```shell
 adb forward tcp:27043 tcp:27043
-frida -h 127.0.0.1:27043 -n Gadget
+frida -H 127.0.0.1:27043 -n Gadget
 ```
