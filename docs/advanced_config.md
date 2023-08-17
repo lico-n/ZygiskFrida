@@ -9,7 +9,7 @@ Both configuration are supported with the advanced config taking precedence in c
 ## Config File
 
 This module is configured via a json config located at `/data/local/tmp/re.zyg.fri/config.json`.
-To start of you can copy the example config
+To start off, you can copy the example config
 ```shell
 adb shell 'su -c cp /data/local/tmp/re.zyg.fri/config.json.example /data/local/tmp/re.zyg.fri/config.json'
 ```
@@ -48,21 +48,21 @@ In case things are not working as expected, check `adb logcat -s ZygiskFrida` to
 
 ## Target configuration.
 
-##### app_name
+### app_name
 The bundle id of the application you want to inject frida into.
 
-##### enabled
-If this target is enabled. If set to false, then this module will ignore this configuration.
+### enabled
+If set to false, then this module will ignore this configuration.
 This is useful if you want to temporarily disable a target while maintaining the config.
 
 
-##### start_up_delay_ms
+### start_up_delay_ms
 Injection of libraries is delayed by this amount in milliseconds.
 
 There are times that you might want to delay the injection of the gadget. Some applications
 might run checks at start up and delaying the injection can help avoid these.
 
-##### injected_libraries
+### injected_libraries
 These are the libraries that will be injected into the process.
 
 The module includes a bundled frida gadget at `/data/local/tmp/re.zyg.fri/libgadget.so`.
@@ -100,15 +100,15 @@ This can cause issues restarting the app. Manually killing the app can resolve t
 adb shell 'su -c kill -9 $(pidof com.example.package)'
 ```
 
-**freeze**\
+### freeze
 The child process will not return from the fork. This means that no code will
 run within the child process but the process itself stays alive.
 
-**kill**\
+### kill
 The child process will be killed as soon as it is forked. No code will
 run within the child process.
 
-**inject**\
+### inject
 This mode will inject the `injected_libraries` into the child process similiar to the target configuration.
 After injection the child process will resume its normal code flow. You may fail to connect to the gadget
 interactively if the child is only doing a quick check and exits.
