@@ -162,6 +162,10 @@ static std::optional<target_config> load_simple_config(std::string const &module
 
     std::string line;
     while (getline(config_file, line)) {
+        if (line.empty()) {
+            continue;
+        }
+
         auto splitted = split(line, ',');
         if (splitted[0] != app_name) {
             continue;
