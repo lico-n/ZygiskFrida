@@ -72,6 +72,17 @@ rm "$TMP_MODULE_DIR/libgadget.so"
 /data/adb/magisk/busybox unxz "$TMP_MODULE_DIR/libgadget.so.xz"
 rm "$TMP_MODULE_DIR/libgadget.so.xz"
 
+if [ "$IS64BIT" = true ]; then
+  ARCH32="arm"
+  [ "$ARCH" = "x64" ] && ARCH32="x86"
+
+  extract "$ZIPFILE" "gadget/libgadget-$ARCH32.so.xz" "$TMP_MODULE_DIR" true
+  mv "$TMP_MODULE_DIR/libgadget-$ARCH32.so.xz" "$TMP_MODULE_DIR/libgadget32.so.xz"
+  rm "$TMP_MODULE_DIR/libgadget32.so"
+  /data/adb/magisk/busybox unxz "$TMP_MODULE_DIR/libgadget32.so.xz"
+  rm "$TMP_MODULE_DIR/libgadget32.so.xz"
+fi
+
 extract "$ZIPFILE" "config.json.example" "$TMP_MODULE_DIR" true
 
 set_perm_recursive "$TMP_MODULE_DIR" 0 0 0755 0644

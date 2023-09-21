@@ -66,7 +66,12 @@ might run checks at start up and delaying the injection can help avoid these.
 These are the libraries that will be injected into the process. The libraries
 specified here will be loaded in the order of the array.
 
-The module includes a bundled frida gadget at `/data/local/tmp/re.zyg.fri/libgadget.so`.
+The module includes a bundled frida gadgets at `/data/local/tmp/re.zyg.fri/libgadget.so`.\
+`libgadget.so` default architecture is always that of your device.
+
+For convenience this module also installs a gadget at `/data/local/tmp/re.zyg.fri/libgadget32.so` for injection into application
+with 32-bit only support on 64-bit devices.
+
 You can adjust the gadget config according to the official [Gadget Doc](https://frida.re/docs/gadget/)
 
 If you want to use a different frida version or an alternative version you can replace this
