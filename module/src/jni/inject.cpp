@@ -62,7 +62,28 @@ static void delay_start_up(uint64_t start_up_delay_ms) {
     }
 }
 
-static void inject_libs(target_config const& cfg) {
+void inject_lib(std::string const &lib_path, std::string const &logContext) {
+    auto *handle = xdl_open(lib_path.c_str(), XDL_TRY_FORCE_LOAD);
+    if (handle) {
+        LOGI("%sInjected %s with handle %p", logContext.c_str(), lib_path.c_str(), handle);
+        return;
+    }
+
+    auto xdl_err = dlerror();
+
+    handle = dlopen(lib_path.c_str(), RTLD_NOW);
+    if (handle) {
+        LOGI("%sInjected %s with handle %p (dlopen)", logContext.c_str(), lib_path.c_str(), handle);
+        return;
+    }
+
+    auto dl_err = dlerror();
+
+    LOGE("%sFailed to inject %s (xdl_open): %s", logContext.c_str(), lib_path.c_str(), xdl_err);
+    LOGE("%sFailed to inject %s (dlopen): %s", logContext.c_str(), lib_path.c_str(), dl_err);
+}
+
+static void inject_libs(target_config const &cfg) {
     // We need to wait for process initialization to complete.
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
@@ -75,14 +96,9 @@ static void inject_libs(target_config const& cfg) {
 
     delay_start_up(cfg.start_up_delay_ms);
 
-    for (auto & lib_path : cfg.injected_libraries) {
+    for (auto &lib_path : cfg.injected_libraries) {
         LOGI("Injecting %s", lib_path.c_str());
-        auto *handle = xdl_open(lib_path.c_str(), XDL_TRY_FORCE_LOAD);
-        if (handle) {
-            LOGI("Injected %s with handle %p", lib_path.c_str(), handle);
-        } else {
-            LOGE("Failed to inject %s : %s", lib_path.c_str(), dlerror());
-        }
+        inject_lib(lib_path, "");
     }
 }
 

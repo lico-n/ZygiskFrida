@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "config.h"
+#include "inject.h"
 
 static std::string child_gating_mode;  // NOLINT
 static std::vector<std::string> injected_libraries;
@@ -31,30 +32,27 @@ pid_t fork_replacement() {
 
     child_pid = getpid();
 
+    auto logContext = "[child_gating][pid " + std::to_string(child_pid) + "] ";
+
     if (child_gating_mode == "kill") {
-        LOGI("[child_gating][pid %d] killing child process", child_pid);
+        LOGI("%skilling child process", logContext.c_str());
         exit(0);
     }
 
     if (child_gating_mode == "freeze") {
-        LOGI("[child_gating][pid %d] freezing child process", child_pid);
+        LOGI("%sfreezing child process",  logContext.c_str());
         std::promise<void>().get_future().wait();
         return 0;
     }
 
     if (child_gating_mode != "inject") {
-        LOGI("[child_gating][pid %d] unknown child_gating_mode %s", child_pid, child_gating_mode.c_str());
+        LOGI("%sunknown child_gating_mode %s",  logContext.c_str(), child_gating_mode.c_str());
         return 0;
     }
 
     for (auto &lib_path : injected_libraries) {
-        LOGI("[child_gating][pid %d] Injecting %s", child_pid, lib_path.c_str());
-        auto *handle = xdl_open(lib_path.c_str(), XDL_TRY_FORCE_LOAD);
-        if (handle) {
-            LOGI("[child_gating][pid %d] Injected %s with handle %p", child_pid, lib_path.c_str(), handle);
-        } else {
-            LOGE("[child_gating][pid %d]Failed to inject %s : %s", child_pid, lib_path.c_str(), dlerror());
-        }
+        LOGI("%sInjecting %s",  logContext.c_str(), lib_path.c_str());
+        inject_lib(lib_path, logContext);
     }
 
     return 0;
