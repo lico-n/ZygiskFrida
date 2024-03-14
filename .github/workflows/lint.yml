@@ -1,0 +1,22 @@
+name: lint
+on:
+  - push
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: pip3 install cpplint
+      - name: Run cpplint
+        run: >
+          cpplint
+          --linelength=120
+          --filter=-build/c++11,-build/header_guard,-legal/copyright,-build/include_subdir
+          --exclude module/src/jni/include/rapidjson
+          --exclude module/src/jni/xdl
+          --exclude module/src/jni/zygisk.h
+          --recursive .
