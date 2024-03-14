@@ -1,5 +1,7 @@
 #include "inject.h"
 
+#include <unistd.h>
+
 #include <chrono>
 #include <cinttypes>
 #include <filesystem>
@@ -14,11 +16,9 @@
 #include "log.h"
 #include "child_gating.h"
 #include "xdl.h"
-#include "process.h"
 #include "remapper.h"
 
-static std::string get_process_name()
-{
+static std::string get_process_name() {
     auto path = "/proc/self/cmdline";
 
     std::ifstream file(path);
@@ -65,23 +65,20 @@ static void delay_start_up(uint64_t start_up_delay_ms) {
     }
 }
 
-void inject_lib(std::string const &lib_path, std::string const &logContext)
-{
+void inject_lib(std::string const &lib_path, std::string const &logContext) {
     auto *handle = xdl_open(lib_path.c_str(), XDL_TRY_FORCE_LOAD);
-    if (handle)
-    {
+    if (handle) {
         LOGI("%sInjected %s with handle %p", logContext.c_str(), lib_path.c_str(), handle);
-        remap_lib("libgadget.so", get_pid_of_self());
+        remap_lib(lib_path);
         return;
     }
 
     auto xdl_err = dlerror();
 
     handle = dlopen(lib_path.c_str(), RTLD_NOW);
-    if (handle)
-    {
+    if (handle) {
         LOGI("%sInjected %s with handle %p (dlopen)", logContext.c_str(), lib_path.c_str(), handle);
-        remap_lib("libgadget.so", get_pid_of_self());
+        remap_lib(lib_path);
         return;
     }
 
@@ -110,7 +107,7 @@ static void inject_libs(target_config const &cfg) {
     }
 }
 
-bool check_and_inject(std::string const &app_name, int pid) {
+bool check_and_inject(std::string const &app_name) {
     std::string module_dir = std::string("/data/local/tmp/re.zyg.fri");
 
     std::optional<target_config> cfg = load_config(module_dir, app_name);
@@ -119,7 +116,7 @@ bool check_and_inject(std::string const &app_name, int pid) {
     }
 
     LOGI("App detected: %s", app_name.c_str());
-    LOGI("PID: %s", get_pid_of_self().c_str());
+    LOGI("PID: %d", getpid());
 
 
     auto target_config = cfg.value();

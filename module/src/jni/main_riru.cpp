@@ -26,7 +26,7 @@ static void forkAndSpecializePost(JNIEnv *env, jclass clazz, jint res) {
         return;
     }
 
-    if (check_and_inject(app_name, 0)) {
+    if (check_and_inject(app_name)) {
         riru_set_unload_allowed(false);
     }
 }

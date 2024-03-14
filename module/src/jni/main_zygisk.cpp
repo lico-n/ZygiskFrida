@@ -21,7 +21,7 @@ class MyModule : public zygisk::ModuleBase {
         std::string app_name = std::string(raw_app_name);
         this->env->ReleaseStringUTFChars(args->nice_name, raw_app_name);
 
-        if (!check_and_inject(app_name, args->uid)) {
+        if (!check_and_inject(app_name)) {
             this->api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
         }
     }
