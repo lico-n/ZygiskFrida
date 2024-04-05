@@ -20,6 +20,10 @@ using riru with an older magisk version rather than zygisk.
 
 ## How to use the module
 
+### Prerequisites
+- Rooted device/emulator
+- Zygisk available and enabled
+
 ### Quick start
 - Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)\
   If you are using riru instead of zygisk choose the riru-release. Otherwise choose the normal version.
