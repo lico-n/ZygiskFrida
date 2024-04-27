@@ -44,6 +44,17 @@ LIB32_NAME="armeabi-v7a.so"
 LIB64_NAME="arm64-v8a.so"
 LIB32_DEST="$MODPATH/zygisk"
 LIB64_DEST="$MODPATH/zygisk"
+BUSYBOX_BIN=/data/adb/magisk/busybox
+
+if [ ! -f $BUSYBOX_BIN ]; then
+  BUSYBOX_BIN=/data/adb/ksu/bin/busybox
+fi
+
+if [ ! -f $BUSYBOX_BIN ]; then
+  abort "! unable to locate busybox"
+fi
+
+ui_print "- Using busybox: $BUSYBOX_BIN"
 
 [ "$FLAVOR" = "riru" ] && LIB32_DEST="$MODPATH/riru/lib"
 [ "$FLAVOR" = "riru" ] && LIB64_DEST="$MODPATH/riru/lib64"
@@ -69,7 +80,7 @@ mkdir -p "$TMP_MODULE_DIR"
 extract "$ZIPFILE" "gadget/libgadget-$ARCH.so.xz" "$TMP_MODULE_DIR" true
 mv "$TMP_MODULE_DIR/libgadget-$ARCH.so.xz" "$TMP_MODULE_DIR/libgadget.so.xz"
 rm "$TMP_MODULE_DIR/libgadget.so"
-/data/adb/magisk/busybox unxz "$TMP_MODULE_DIR/libgadget.so.xz"
+$BUSYBOX_BIN unxz "$TMP_MODULE_DIR/libgadget.so.xz"
 rm "$TMP_MODULE_DIR/libgadget.so.xz"
 
 if [ "$IS64BIT" = true ]; then
@@ -79,7 +90,7 @@ if [ "$IS64BIT" = true ]; then
   extract "$ZIPFILE" "gadget/libgadget-$ARCH32.so.xz" "$TMP_MODULE_DIR" true
   mv "$TMP_MODULE_DIR/libgadget-$ARCH32.so.xz" "$TMP_MODULE_DIR/libgadget32.so.xz"
   rm "$TMP_MODULE_DIR/libgadget32.so"
-  /data/adb/magisk/busybox unxz "$TMP_MODULE_DIR/libgadget32.so.xz"
+  $BUSYBOX_BIN unxz "$TMP_MODULE_DIR/libgadget32.so.xz"
   rm "$TMP_MODULE_DIR/libgadget32.so.xz"
 fi
 
