@@ -51,6 +51,10 @@ if [ ! -f $BUSYBOX_BIN ]; then
 fi
 
 if [ ! -f $BUSYBOX_BIN ]; then
+  BUSYBOX_BIN=/data/adb/ap/bin/busybox
+fi
+
+if [ ! -f $BUSYBOX_BIN ]; then
   abort "! unable to locate busybox"
 fi
 
