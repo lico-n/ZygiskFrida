@@ -18,6 +18,12 @@ struct target_config{
     uint64_t start_up_delay_ms;
     std::vector<std::string> injected_libraries;
     child_gating_config child_gating;
+    // When true, inject synchronously inside postAppSpecialize (before the app
+    // runs Application.onCreate) instead of waiting for process init on a
+    // detached thread. Lets the gadget's top-level hooks land before the app's
+    // first anti-tamper check. Optional; defaults to false. Safe only for
+    // script-interaction gadgets (they load their script and return).
+    bool inject_on_specialize;
 };
 
 std::optional<target_config> load_config(std::string const& module_dir, std::string const& app_name);

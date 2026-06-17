@@ -93,7 +93,15 @@ static void inject_libs(target_config const &cfg) {
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
     // undiscoverable or otherwise cause issue attaching.
-    wait_for_init(cfg.app_name);
+    //
+    // This concern only applies to listen-interaction gadgets (which block
+    // waiting for a client) and to frida-server discoverability. A
+    // script-interaction gadget just loads its script and returns, so targets
+    // that set inject_on_specialize skip the wait and get injected before
+    // Application.onCreate — see check_and_inject().
+    if (!cfg.inject_on_specialize) {
+        wait_for_init(cfg.app_name);
+    }
 
     if (cfg.child_gating.enabled) {
         enable_child_gating(cfg.child_gating);
@@ -123,6 +131,17 @@ bool check_and_inject(std::string const &app_name) {
     if (!target_config.enabled) {
         LOGI("Injection disabled for %s", app_name.c_str());
         return false;
+    }
+
+    if (target_config.inject_on_specialize) {
+        // Inject synchronously on the Zygisk specialize thread so the dlopen
+        // completes before postAppSpecialize returns -> before
+        // handleBindApplication -> before Application.onCreate. This is what
+        // lets the gadget's top-level hooks (e.g. gregson's libc ioctl ADB
+        // bypass) be live before the app's first anti-tamper read, instead of
+        // racing them on a detached thread.
+        inject_libs(target_config);
+        return true;
     }
 
     std::thread inject_thread(inject_libs, target_config);
