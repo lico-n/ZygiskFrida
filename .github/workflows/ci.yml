@@ -15,6 +15,12 @@ jobs:
           distribution: temurin
           java-version: 11
           cache: gradle
+      - name: Run unit tests
+        run: |
+          chmod +x ./module/src/jni/tests/run.sh
+          ./module/src/jni/tests/run.sh
+        env:
+          CXX: g++
       - name: Get Module Version
         id: module-version
         run: |
